@@ -1,18 +1,19 @@
 import requests
 import yaml
+import os
 
 from oauthclient.credentialutil import credentialutil
 from oauthclient.oauth2api import oauth2api
 from oauthclient.model.model import environment
 
 creds = credentialutil()
-creds.load('config.yaml')
+creds.load(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 ebayAPI = oauth2api()
 
 ### Get the login URL ###
 def generate_login_url():
     # load the scopes from the config file
-    with open('settings.yaml', 'r') as file:
+    with open(os.path.join(os.path.dirname(__file__), 'settings.yaml'), 'r') as file:
         settings = yaml.safe_load(file)
     scopes = settings['scopes']
 

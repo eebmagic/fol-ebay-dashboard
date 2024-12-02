@@ -1,4 +1,5 @@
 import json
+import os
 
 ### Format Sheet Cell Values ###
 
@@ -13,7 +14,7 @@ def format_image(fullItem):
 ### Pull Listing Item Data ###
 
 def get_item(legacyItemId):
-    with open('sample-data/items.json') as file:
+    with open(os.path.join(os.path.dirname(__file__), 'sample-data/items.json')) as file:
         itemData = json.load(file)
     
     if legacyItemId in itemData:

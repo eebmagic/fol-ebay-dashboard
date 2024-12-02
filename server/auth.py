@@ -1,7 +1,7 @@
 import json
 import os
 
-SESSIONS_FILE = 'data/sessions.json'
+SESSIONS_FILE = os.path.join(os.path.dirname(__file__), 'data/sessions.json')
 
 ### Session functions ###
 
