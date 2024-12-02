@@ -1,3 +1,6 @@
+'''
+Handles the authentication sessions for users.
+'''
 import json
 import os
 
@@ -5,7 +8,7 @@ SESSIONS_FILE = os.path.join(os.path.dirname(__file__), 'data/sessions.json')
 
 ### Session functions ###
 
-def check_session(session_id):
+def check_session(sessionId):
     '''
     Checks that the session presented from the user is valid.
     Tries to refresh the session if it is expired.
@@ -16,7 +19,7 @@ def check_session(session_id):
             'success': False,
             'message': 'No sessions file found'
         }
-        
+
     # Load sessions from file
     try:
         with open(SESSIONS_FILE, 'r') as f:
@@ -27,23 +30,23 @@ def check_session(session_id):
             'message': 'Error loading sessions file',
             'error': e
         }
-        
+
     # Check if session exists
-    if session_id not in sessions:
+    if sessionId not in sessions:
         return {
             'success': False,
             'message': 'Session not found'
         }
-    
+
     # TODO: Check if session is expired
-    
+
     return {
         'success': True,
         'message': 'Session found',
-        'result': sessions[session_id]
+        'result': sessions[sessionId]
     }
 
-def store_session(session_id, tokenData):
+def store_session(sessionId, tokenData):
     '''
     Stores a session in the sessions file.
     '''
@@ -56,24 +59,15 @@ def store_session(session_id, tokenData):
                 sessions = {}
     else:
         sessions = {}
-    
+
     # Add new session
-    sessions[session_id] = tokenData
-    
+    sessions[sessionId] = tokenData
+
     # Save updated sessions
     with open(SESSIONS_FILE, 'w') as f:
         json.dump(sessions, f)
-    
+
     return True
-
-
-### Auth functions ###
-
-def get_signIn_url():
-    return 'TODO: implement'
-
-def get_token(signInCode):
-    return 'TODO: implement'
 
 
 if __name__ == '__main__':

@@ -37,11 +37,16 @@ def reduce_single_order(order):
             'Date Sold':            order['creationDate'],
             'Total Sold Price':     order['totalFeeBasisAmount']['value'],
             # For some reason, not all orders/items have a key for ebayCollectAndRemitTaxes,
-            # However the keyword shows up 89 times in the sample, even though there are 50 orders and 53 line items?
-            'Tax':                  item['ebayCollectAndRemitTaxes'][0]['amount']['value'] if ('ebayCollectAndRemitTaxes' in item) else 0,
+            # However the keyword shows up 89 times in the sample,
+            # even though there are 50 orders and 53 line items?
+            'Tax':                  (item['ebayCollectAndRemitTaxes'][0]['amount']['value']
+                                     if 'ebayCollectAndRemitTaxes' in item
+                                     else 0),
             'Fees':                 order['totalMarketplaceFee']['value'],
             'Shipping (User Paid)': order['pricingSummary']['deliveryCost']['value'],
-            'Discount':             order['pricingSummary']['adjustment']['value'] if ('adjustment' in order['pricingSummary']) else 0,
+            'Discount':             (order['pricingSummary']['adjustment']['value']
+                                     if 'adjustment' in order['pricingSummary']
+                                     else 0),
         }
 
         return row
@@ -71,8 +76,8 @@ if __name__ == '__main__':
     print(data.keys())
     print(f'DATA HAS {len(data["orders"])} ORDERS')
 
-    rows = format_orders(data['orders'])
-    df = pd.DataFrame(rows)
+    rowData = format_orders(data['orders'])
+    df = pd.DataFrame(rowData)
     print(df)
 
     import pyperclip
@@ -80,5 +85,3 @@ if __name__ == '__main__':
     tsv_string = df.head(3).to_csv(sep='\t', index=False)
     pyperclip.copy(tsv_string)
     print('COPIED TO CLIPBOARD')
-
-

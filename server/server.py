@@ -45,8 +45,6 @@ def login():
     # Try login with code
     tokenData = auth.get_token(code)
     session_id = str(uuid.uuid4())
-
-    # Store session ID and token mapping for future requests
     auth.store_session(session_id, tokenData)
 
     return jsonify({'session_id': session_id})
