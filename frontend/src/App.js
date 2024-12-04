@@ -4,8 +4,11 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [code, setCode] = useState(null);
   const [isFailed, setIsFailed] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [prevCode, setPrevCode] = useState(null);
+  const [prevSessionId, setPrevSessionId] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -20,10 +23,53 @@ function App() {
     console.log('Got EBay code');
     console.log(code);
 
-    // TODO: Send code to backend to get sessionId
+    setCode(code);
 
-    setIsAuthenticated(true);
+    // TODO: Send code to backend to get sessionId
   }
+
+  const login = async ({code, sessionId}) => {
+    let validated = false;
+    if (sessionId) {
+      // Check the session is live or refresh it
+    }
+
+    if (code && !validated) {
+      // Start new session
+      const response = await fetch('http://127.0.0.1:5000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code })
+      });
+      const data = await response.json();
+      console.log('got this login data back:', data);
+      if (data.session_id) {
+        setSessionId(data.session_id);
+        validated = true;
+      }
+    }
+
+    return validated;
+  }
+
+  useEffect(() => {
+    console.log('Code or SessionId changed:', {
+      before: {
+        code: prevCode,
+        sessionId: prevSessionId
+      },
+      after: {
+        code: code,
+        sessionId: sessionId
+      }
+    });
+
+    setPrevCode(code);
+    setPrevSessionId(sessionId);
+    login({code, sessionId});
+  }, [code]);
 
   const fetchSignInUrl = async () => {
     const response = await fetch('http://127.0.0.1:5000/signInUrl');
@@ -35,12 +81,24 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        {isAuthenticated ? (
-          <p style={{color: 'green'}}><i>Successfully authenticated with eBay!</i></p>
+        {sessionId ? (
+          <div>
+            <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p>
+            <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
+            <button onClick={() => window.location.href = '/'}>RESET</button>
+          </div>
+        ) : code ? (
+          <div>
+            <p style={{color: 'orange'}}><i>Received code from eBay!</i></p>
+            <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>Code: {code}</p>
+            {/* Take this out later */}
+            <button onClick={() => window.location.href = '/'}>RESET</button>
+          </div>
         ) : isFailed ? (
           <div>
             <p style={{color: 'red'}}><i>Failed to authenticate with eBay!</i></p>
             <p>Try clearing out the url and signing in again.</p>
+            <button onClick={() => window.location.href = '/'}>RESET</button>
           </div>
         ) : (
           <>
