@@ -45,5 +45,7 @@ def get_item(token, item_id):
 
 
 ### Auth Tokens ###
-def get_token():
-    return 'TODO: implement'
+def get_token(code):
+    tokenResponse = ebayAPI.exchange_code_for_access_token(environment.PRODUCTION, code)
+
+    return tokenResponse

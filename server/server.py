@@ -46,11 +46,28 @@ def login():
         }), 200
 
     # Try login with code
-    tokenData = auth.get_token(code)
-    session_id = str(uuid.uuid4())
-    auth.store_session(session_id, tokenData)
+    try:
+        tokenData = ebayApi.get_token(code)
+        session_id = str(uuid.uuid4())
+        auth.store_session(session_id, tokenData)
+        payload = {
+            'success': True,
+            'message': 'Session created',
+            'session_id': session_id
+        }
+        return jsonify(payload), 200
+    except Exception as e:
+        import traceback
+        print('Error getting token from code:', e)
+        print('Full stack trace:')
+        print(traceback.format_exc())
+        payload = {
+            'error': str(e),
+            'message': 'Failed to get token from code',
+            'session_id': None
+        }
+        return jsonify(payload), 500
 
-    return jsonify({'session_id': session_id})
 
 @app.route('/viewData', methods=['GET'])
 def view_data():

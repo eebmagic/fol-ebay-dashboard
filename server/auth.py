@@ -14,22 +14,14 @@ def check_session(sessionId):
     Tries to refresh the session if it is expired.
     '''
     # Check if sessions file exists
-    if not os.path.exists(SESSIONS_FILE):
-        return {
-            'success': False,
-            'message': 'No sessions file found'
-        }
-
-    # Load sessions from file
-    try:
+    if os.path.exists(SESSIONS_FILE):
         with open(SESSIONS_FILE, 'r') as f:
-            sessions = json.load(f)
-    except json.JSONDecodeError as e:
-        return {
-            'success': False,
-            'message': 'Error loading sessions file',
-            'error': e
-        }
+            try:
+                sessions = json.load(f)
+            except json.JSONDecodeError:
+                sessions = {}
+    else:
+        sessions = {}
 
     # Check if session exists
     if sessionId not in sessions:
@@ -50,6 +42,9 @@ def store_session(sessionId, tokenData):
     '''
     Stores a session in the sessions file.
     '''
+    if tokenData.error:
+        return False
+
     # Load existing sessions
     if os.path.exists(SESSIONS_FILE):
         with open(SESSIONS_FILE, 'r') as f:
@@ -61,9 +56,12 @@ def store_session(sessionId, tokenData):
         sessions = {}
 
     # Add new session
-    sessions[sessionId] = tokenData
+    sessions[sessionId] = tokenData.to_json()
+
+    # TODO: Add check to see if > 10 sessions, if so, delete the oldest one
 
     # Save updated sessions
+    os.makedirs(os.path.dirname(SESSIONS_FILE), exist_ok=True)
     with open(SESSIONS_FILE, 'w') as f:
         json.dump(sessions, f)
 
