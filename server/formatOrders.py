@@ -14,7 +14,7 @@ def reduce_multi_order(order):
         'Date Sold':            '',
         'Total Sold Price':     '',
         'Tax':                  '',
-        'Fees':                 '', 
+        'Fees':                 '',
         'Shipping (User Paid)': '',
         'Discount':             '',
     }

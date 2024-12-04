@@ -23,7 +23,7 @@ def get_signin_url():
     payload = {'url': url}
     return jsonify(payload)
 
-@app.route('/logIn', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     code = request.json.get('code')
     session_id = request.json.get('sessionId')
@@ -52,7 +52,7 @@ def login():
 
     return jsonify({'session_id': session_id})
 
-@app.route('/viewData', methods=['GET']) 
+@app.route('/viewData', methods=['GET'])
 def view_data():
     token = request.headers.get('Authorization')
     if not token:
