@@ -7,8 +7,6 @@ function App() {
   const [code, setCode] = useState(null);
   const [isFailed, setIsFailed] = useState(false);
   const [sessionId, setSessionId] = useState(null);
-  const [prevCode, setPrevCode] = useState(null);
-  const [prevSessionId, setPrevSessionId] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -55,27 +53,34 @@ function App() {
   }
 
   useEffect(() => {
-    console.log('Code or SessionId changed:', {
-      before: {
-        code: prevCode,
-        sessionId: prevSessionId
-      },
-      after: {
-        code: code,
-        sessionId: sessionId
-      }
-    });
+    console.log('Code or SessionId changed:', code);
 
-    setPrevCode(code);
-    setPrevSessionId(sessionId);
-    login({code, sessionId});
+    login({code});
   }, [code]);
 
   const fetchSignInUrl = async () => {
-    const response = await fetch('http://127.0.0.1:5000/signInUrl');
-    const data = await response.json();
-    window.location.href = data.url;
-  }
+    try {
+      const response = await fetch('http://127.0.0.1:5000/signInUrl', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Origin': 'http://localhost:3000'
+        }
+      });
+
+      console.log('response for sign in url:', response);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Error fetching sign in URL:', error);
+      setIsFailed(true);
+    }
+  };
 
   return (
     <div className="App">

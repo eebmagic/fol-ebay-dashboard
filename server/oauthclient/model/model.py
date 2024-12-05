@@ -17,6 +17,8 @@ limitations under the License.
 
 """
 
+import json
+
 class env_type(object):
     def __init__(self, config_id, web_endpoint, api_endpoint):
         self.config_id = config_id
@@ -60,3 +62,12 @@ class oAuth_token(object):
                 token_str += ', "refresh_token": "' + self.refresh_token  + '", "refresh_token_expire_in": "' + self.refresh_token_expiry.strftime('%Y-%m-%dT%H:%M:%S:%f')+ '"'
         token_str += '}'
         return token_str
+
+    def to_json(self):
+        payload = {
+            'access_token': self.access_token,
+            'token_expiry': self.token_expiry.isoformat(),
+            'refresh_token': self.refresh_token,
+            'refresh_token_expiry': self.refresh_token_expiry.isoformat()
+        }
+        return json.dumps(payload)
