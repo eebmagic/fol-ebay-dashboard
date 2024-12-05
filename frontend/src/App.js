@@ -10,6 +10,12 @@ function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const foundSessionId = localStorage.getItem('sessionId');
+    console.log('foundSessionId', foundSessionId);
+    if (foundSessionId) {
+      setSessionId(foundSessionId);
+    }
+
     if (params.get('isAuthSuccessful') === 'true' && params.get('code')) {
       handleSuccessfulAuth(params.get('code'));
     } else if (params.get('isAuthSuccessful') === 'false') {
@@ -27,36 +33,49 @@ function App() {
   }
 
   const login = async ({code, sessionId}) => {
+    if (!code && !sessionId) {
+      return false;
+    }
+
     let validated = false;
+    let payload = {};
+
     if (sessionId) {
       // Check the session is live or refresh it
+      payload.sessionId = sessionId;
     }
 
     if (code && !validated) {
       // Start new session
-      const response = await fetch('http://127.0.0.1:5000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ code })
-      });
-      const data = await response.json();
-      console.log('got this login data back:', data);
-      if (data.session_id) {
-        setSessionId(data.session_id);
-        validated = true;
-      }
+      payload.code = code;
+    }
+
+    const response = await fetch('http://127.0.0.1:5000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    console.log('got this login data back:', data);
+    if (data.session_id) {
+      setSessionId(data.session_id);
+      localStorage.setItem('sessionId', data.session_id);
+      validated = true;
     }
 
     return validated;
   }
 
   useEffect(() => {
-    console.log('Code or SessionId changed:', code);
+    console.log('Code or SessionId changed:', {
+      code,
+      sessionId
+    });
 
-    login({code});
-  }, [code]);
+    login({code, sessionId});
+  }, [code, sessionId]);
 
   const fetchSignInUrl = async () => {
     try {
