@@ -1,6 +1,7 @@
 import requests
 import yaml
 import os
+import json
 
 from oauthclient.credentialutil import credentialutil
 from oauthclient.oauth2api import oauth2api
@@ -10,12 +11,18 @@ creds = credentialutil()
 creds.load(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 ebayAPI = oauth2api()
 
-### Get the login URL ###
-def generate_login_url():
+def generate_scopes():
     # load the scopes from the config file
     with open(os.path.join(os.path.dirname(__file__), 'settings.yaml'), 'r') as file:
         settings = yaml.safe_load(file)
     scopes = settings['scopes']
+
+    return scopes
+
+
+### Get the login URL ###
+def generate_login_url():
+    scopes = generate_scopes()
 
     loginURL = ebayAPI.generate_user_authorization_url(environment.PRODUCTION, scopes)
 
@@ -49,3 +56,11 @@ def get_token(code):
     tokenResponse = ebayAPI.exchange_code_for_access_token(environment.PRODUCTION, code)
 
     return tokenResponse
+
+
+def refresh_token(refresh_token):
+    scopes = generate_scopes()
+
+    refreshedToken = ebayAPI.get_access_token(environment.PRODUCTION, refresh_token=refresh_token, scopes=scopes)
+
+    return refreshedToken.to_json()

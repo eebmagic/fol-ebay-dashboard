@@ -18,6 +18,15 @@ limitations under the License.
 """
 
 import json
+from datetime import datetime
+
+def clean_string(value):
+    if type(value) == str:
+        return value
+    elif isinstance(value, datetime):
+        return value.isoformat()
+    else:
+        return f'Failed to convert from type: {type(value)}'
 
 class env_type(object):
     def __init__(self, config_id, web_endpoint, api_endpoint):
@@ -64,10 +73,17 @@ class oAuth_token(object):
         return token_str
 
     def to_json(self):
-        payload = {
-            'access_token': self.access_token,
-            'token_expiry': self.token_expiry.isoformat(),
-            'refresh_token': self.refresh_token,
-            'refresh_token_expiry': self.refresh_token_expiry.isoformat()
-        }
-        return json.dumps(payload)
+        if self.refresh_token:
+            payload = {
+                'access_token': self.access_token,
+                'token_expiry': clean_string(self.token_expiry),
+                'refresh_token': self.refresh_token,
+                'refresh_token_expiry': clean_string(self.refresh_token_expiry)
+            }
+        else:
+            payload = {
+                'access_token': self.access_token,
+                'token_expiry': clean_string(self.token_expiry),
+            }
+
+        return payload
