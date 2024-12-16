@@ -101,6 +101,36 @@ function App() {
     }
   };
 
+  const fetchData = async () => {
+    if (!sessionId) {
+      console.log('Can\'t get data because session id is: ', sessionId);
+    }
+
+    try {
+      const url = new URL('http://localhost:5000/viewData');
+      url.searchParams.set('sessionId', sessionId);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Origin': 'http://localhost:3000'
+        }
+      });
+
+      if (!response.ok) {
+        console.log('Got back not-ok response:', response.ok);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Data fetched successfully:', data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setIsFailed(true);
+    }
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -110,6 +140,9 @@ function App() {
             <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p>
             <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
             <button onClick={() => window.location.href = '/'}>RESET</button>
+            <div>
+              <button onClick={fetchData}>GET DATA</button>
+            </div>
           </div>
         ) : code ? (
           <div>
