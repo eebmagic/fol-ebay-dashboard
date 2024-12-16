@@ -1,5 +1,6 @@
 import uuid
 from urllib.parse import quote
+import json
 
 # Library imports
 from flask import Flask, request, jsonify
@@ -54,7 +55,7 @@ def login():
 
     # Try login with code
     try:
-        tokenData = ebayApi.get_token(code)
+        tokenData = ebayApi.get_token(code).to_json()
         session_id = str(uuid.uuid4())
         auth.store_session(session_id, tokenData)
         payload = {
@@ -78,15 +79,27 @@ def login():
 
 @app.route('/viewData', methods=['GET'])
 def view_data():
-    token = request.headers.get('Authorization')
-    if not token:
-        return jsonify({'error': 'No token provided'}), 401
-
     try:
-        orders_data = ebayApi.get_orders(token)
-        formatted_data = formatOrders.format_orders(orders_data['orders'])
-        return jsonify(formatted_data)
+        session_id = request.args.get('sessionId')
+        if not session_id:
+            return jsonify({'error': 'No session_id provided'}), 400
+
+        # Get latest token for the session
+        session_result = auth.check_session(session_id)
+        if 'success' not in session_result or not session_result['success']:
+            return jsonify({'error': 'Invalid session'}), 401
+        session_data = session_result['result']
+        token = session_data['access_token']
+
+        # Make request to get orders and then return them
+        orders = ebayApi.get_orders(token)
+
+        return jsonify({'message': 'success', 'orders': orders})
+
     except Exception as e:
+        import traceback
+        print('An exception occurred:', e)
+        print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

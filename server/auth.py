@@ -28,7 +28,7 @@ def get_session(sessionId):
     sessions = load_session_store()
 
     result = sessions.get(sessionId, None)
-    if result:
+    if type(result) == str:
         return json.loads(result)
 
     return result
@@ -48,7 +48,7 @@ def check_session(sessionId):
             'message': 'Session not found'
         }
 
-    session = json.loads(sessions[sessionId])
+    session = sessions[sessionId]
 
     # Check if session is expired, refresh if so
     latestData = refresh_session(sessionId, session)
