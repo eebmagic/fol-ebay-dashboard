@@ -1,7 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import logo from './logo.svg';
 import './App.css';
+
+const API_BASE_URL = 'http://127.0.0.1:5000';
+const DEFAULT_HEADERS = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+};
 
 function App() {
   const [code, setCode] = useState(null);
@@ -37,38 +43,41 @@ function App() {
       return false;
     }
 
-    let validated = false;
-    let payload = {};
+    try {
+      const payload = {
+        ...(sessionId && { sessionId }),
+        ...(code && { code })
+      };
 
-    if (sessionId) {
-      // Check the session is live or refresh it
-      payload.sessionId = sessionId;
+
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: DEFAULT_HEADERS,
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('got this login data back:', data);
+
+      if (data.session_id) {
+        setSessionId(data.session_id);
+        localStorage.setItem('sessionId', data.session_id);
+        return true;
+      }
+      return false;
+
+    } catch (error) {
+      console.error('Login error:', error);
+      setIsFailed(true);
+      return false;
     }
+  };
 
-    if (code && !validated) {
-      // Start new session
-      payload.code = code;
-    }
-
-    const response = await fetch('http://127.0.0.1:5000/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json();
-    console.log('got this login data back:', data);
-    if (data.session_id) {
-      setSessionId(data.session_id);
-      localStorage.setItem('sessionId', data.session_id);
-      validated = true;
-    }
-
-    return validated;
-  }
-
-  useEffect(() => {
+  useMemo(() => {
     console.log('Code or SessionId changed:', {
       code,
       sessionId
@@ -79,15 +88,10 @@ function App() {
 
   const fetchSignInUrl = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/signInUrl', {
+      const response = await fetch(`${API_BASE_URL}/signInUrl`, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Origin': 'http://localhost:3000'
-        }
+        headers: DEFAULT_HEADERS,
       });
-
-      console.log('response for sign in url:', response);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -104,32 +108,31 @@ function App() {
   const fetchData = async () => {
     if (!sessionId) {
       console.log('Can\'t get data because session id is: ', sessionId);
+      return;
     }
 
     try {
-      const url = new URL('http://localhost:5000/viewData');
+      const url = new URL(`${API_BASE_URL}/viewData`);
       url.searchParams.set('sessionId', sessionId);
+      console.log(`Making request to ${url}`);
 
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Origin': 'http://localhost:3000'
-        }
+        headers: DEFAULT_HEADERS,
       });
 
       if (!response.ok) {
-        console.log('Got back not-ok response:', response.ok);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
       console.log('Data fetched successfully:', data);
+      return data;
     } catch (error) {
       console.error('Error fetching data:', error);
       setIsFailed(true);
     }
-  }
+  };
 
   return (
     <div className="App">

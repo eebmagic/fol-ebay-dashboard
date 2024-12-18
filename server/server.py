@@ -12,13 +12,7 @@ import ebayApi
 import formatOrders
 
 app = Flask(__name__)
-CORS(app, resources={
-    r"/*": {
-        "origins": ["http://localhost:3000"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+CORS(app)
 
 @app.route('/signInUrl', methods=['GET'])
 def get_signin_url():
