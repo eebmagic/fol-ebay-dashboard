@@ -5,7 +5,7 @@ import utils
 import ebayApi
 import auth
 
-def reduce_multi_order(order):
+def reduce_multi_order(order, token):
     '''
     Reduce an order that has multiple line items
     '''
@@ -21,7 +21,7 @@ def reduce_multi_order(order):
 
     return [row]
 
-def reduce_single_order(order):
+def reduce_single_order(order, token):
     '''
     Reduce an order that has a single line item
     '''
@@ -57,14 +57,14 @@ def reduce_single_order(order):
         raise
 
 
-def format_orders(orders):
+def format_orders(orders, token):
     rows = []
     for order in orders:
         if len(order['lineItems']) > 1:
-            result = reduce_multi_order(order)
+            result = reduce_multi_order(order=order, token=token)
             rows.extend(result)
         else:
-            rows.append(reduce_single_order(order))
+            rows.append(reduce_single_order(order=order, token=token))
 
     return rows
 

@@ -83,10 +83,12 @@ def view_data():
         if 'success' not in session_result or not session_result['success']:
             return jsonify({'error': 'Invalid session'}), 401
         session_data = session_result['result']
+        print(f'Using session data: {json.dumps(session_data, indent=2)}')
         token = session_data['access_token']
 
         # Make request to get orders and then return them
-        orders = ebayApi.get_orders(token)
+        orders = ebayApi.get_orders(token)['orders']
+        orders = formatOrders.format_orders(orders=orders, token=token)
 
         return jsonify({'message': 'success', 'orders': orders})
 
