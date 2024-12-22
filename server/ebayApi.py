@@ -1,4 +1,5 @@
 import requests
+import xmltodict
 import yaml
 import os
 import json
@@ -21,6 +22,7 @@ def generate_scopes():
 
 
 ### Get the login URL ###
+
 def generate_login_url():
     scopes = generate_scopes()
 
@@ -30,6 +32,7 @@ def generate_login_url():
 
 
 ### Endpoint Interactions ###
+
 def get_orders(token):
     url = 'https://api.ebay.com/sell/fulfillment/v1/order'
     headers = {
@@ -39,19 +42,43 @@ def get_orders(token):
 
     response = requests.get(url, headers=headers)
 
-    if not response.ok:
-        raise Exception(f'Failed to get orders: {response.status_code} {response.text}')
-
-    if response.status_code != 200:
+    if (not response.ok) or (response.status_code != 200):
         raise Exception(f'Failed to get orders: {response.status_code} {response.text}')
 
     return response.json()
 
 def get_item(token, item_id):
-    return 'TODO: implement'
+    url = 'https://api.ebay.com/ws/api.dll'
+
+    headers = {
+        'X-EBAY-API-SITEID': '0',
+        'X-EBAY-API-COMPATIBILITY-LEVEL': '967',
+        'X-EBAY-API-CALL-NAME': 'GetItem',
+        'X-EBAY-API-IAF-TOKEN': token,
+        'Content-Type': 'text/xml'
+    }
+
+    xml_request = f'''<?xml version="1.0" encoding="utf-8"?>
+<GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+    <ErrorLanguage>en_US</ErrorLanguage>
+    <WarningLevel>High</WarningLevel>
+    <ItemID>{item_id}</ItemID>
+</GetItemRequest>'''
+
+    response = requests.post(url, headers=headers, data=xml_request)
+
+    if (not response.ok) or (response.status_code != 200):
+        raise Exception(f'Failed to get item: {response.status_code} {response.text}')
+
+    # Convert XML response to JSON
+    response_dict = xmltodict.parse(response.text)
+    response_dict = response_dict['GetItemResponse']['Item']
+
+    return response_dict
 
 
 ### Auth Tokens ###
+
 def get_token(code):
     tokenResponse = ebayAPI.exchange_code_for_access_token(environment.PRODUCTION, code)
 

@@ -26,7 +26,8 @@ def reduce_single_order(order, token):
     Reduce an order that has a single line item
     '''
     item = order['lineItems'][0]
-    fullItem = utils.get_item(item['legacyItemId'])
+    print(f'Expanding data for this order: {json.dumps(order, indent=2)}')
+    fullItem = ebayApi.get_item(token, item['legacyItemId'])
 
     try:
         urlTitle = utils.format_url(item['title'], item['legacyItemId'])
