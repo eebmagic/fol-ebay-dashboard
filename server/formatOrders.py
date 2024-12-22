@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-
+from datetime import datetime
 import utils
 import ebayApi
 import auth
@@ -32,10 +32,16 @@ def reduce_single_order(order, token):
     try:
         urlTitle = utils.format_url(item['title'], item['legacyItemId'])
         imageUrl = utils.format_image(fullItem)
+        dateSold = datetime.strptime(order['creationDate'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        dateListed = datetime.strptime(fullItem['ListingDetails']['StartTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        daysListed = (dateSold - dateListed).days
+
         row = {
             'Title':                urlTitle,
             'Image':                imageUrl,
-            'Date Sold':            order['creationDate'],
+            'Date Sold':            order['creationDate'],  # TODO: Date formatting
+            'Date Listed':          fullItem['ListingDetails']['StartTime'],  # TODO: Date formatting
+            'Total Days Listed':    daysListed,
             'Total Sold Price':     order['totalFeeBasisAmount']['value'],
             # For some reason, not all orders/items have a key for ebayCollectAndRemitTaxes,
             # However the keyword shows up 89 times in the sample,

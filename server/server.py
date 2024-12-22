@@ -88,6 +88,7 @@ def view_data():
 
         # Make request to get orders and then return them
         orders = ebayApi.get_orders(token)['orders']
+        orders = orders[-5:] # TODO: TEMPORARY: only get 5 orders
         orders = formatOrders.format_orders(orders=orders, token=token)
 
         return jsonify({'message': 'success', 'orders': orders})
