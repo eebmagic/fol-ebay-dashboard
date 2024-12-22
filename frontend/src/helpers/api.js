@@ -26,7 +26,6 @@ export const login = async ({code, sessionId}) => {
     }
 
     const data = await response.json();
-    console.log('got this login data back:', data);
     return data.session_id ? data.session_id : false;
 
   } catch (error) {
@@ -57,7 +56,6 @@ export const fetchData = async (sessionId) => {
 
   const url = new URL(`${API_BASE_URL}/viewData`);
   url.searchParams.set('sessionId', sessionId);
-  console.log(`Making request to ${url}`);
 
   const response = await fetch(url, {
     method: 'GET',
@@ -69,6 +67,5 @@ export const fetchData = async (sessionId) => {
   }
 
   const data = await response.json();
-  console.log('Data fetched successfully:', data);
   return data;
 }; 

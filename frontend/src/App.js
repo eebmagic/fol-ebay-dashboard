@@ -3,8 +3,12 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { PrimeReactProvider } from 'primereact/api';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-import './App.css';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+
 import { login, fetchSignInUrl, fetchData } from './helpers/api';
+
+import './App.css';
 
 function App() {
   const toast = useRef(null);
@@ -18,7 +22,6 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const foundSessionId = localStorage.getItem('sessionId');
-    console.log('foundSessionId', foundSessionId);
     if (foundSessionId) {
       setSessionId(foundSessionId);
     }
@@ -40,19 +43,15 @@ function App() {
   }
 
   useMemo(() => {
-    console.log('Code or SessionId changed:', {
-      code,
-      sessionId
-    });
-
     login({code, sessionId});
   }, [code, sessionId]);
 
 
-  const buttonFunc = async (func) => {
+  const buttonFunc = async () => {
+    console.log('Getting order data ...');
     setIsLoading(true);
     try {
-      const orderResponse = await func(sessionId)
+      const orderResponse = await fetchData(sessionId)
       setIsLoading(false);
 
       console.log('orderResponse', orderResponse);
@@ -77,6 +76,16 @@ function App() {
     console.log('orders state changed', orders);
   }, [orders]);
 
+  const imageBodyTemplate = (rowData) => {
+    const size = '60px';
+    return <img
+      src={rowData.Image.preview}
+      alt={rowData.Title.preview}
+      style={{width: size, height: size, objectFit: 'contain'}}
+      key={rowData.Image.preview}
+    />
+  }
+
   return (
     <PrimeReactProvider>
       <div className="App">
@@ -89,11 +98,13 @@ function App() {
             }
           </div>
           <div name="orders">
-            {(orders && orders.length > 0) ? orders.map((order) => (
-              <div key={order.Title}>
-                <p>{order['Date Sold']}</p>
-              </div>
-            )) : <p>No orders found</p>}
+            {(orders && orders.length > 0) ? (
+              <DataTable value={orders}>
+                <Column field="Image.preview" header="Image" body={imageBodyTemplate} />
+                <Column field="Title.preview" header="Title" />
+                <Column field="Date Sold" header="Date Sold" />
+              </DataTable>
+            ) : <p>No orders found</p>}
           </div>
         {sessionId ? (
           <div>
@@ -101,7 +112,7 @@ function App() {
             <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
             <button onClick={() => window.location.href = '/'}>RESET</button>
             <div>
-              <Button label="GET DATA" onClick={() => buttonFunc(fetchData)} />
+              <Button label="GET DATA" onClick={buttonFunc} />
             </div>
             <div>
               {orders ? orders.map((order) => (

@@ -4,11 +4,21 @@ import os
 ### Format Sheet Cell Values ###
 
 def format_url(title, legacyItemId):
-    return f'=HYPERLINK("https://www.ebay.com/itm/{legacyItemId}", "{title}")'
+    value = f'=HYPERLINK("https://www.ebay.com/itm/{legacyItemId}", "{title}")'
+
+    return {
+        'value': value,
+        'preview': title,
+    }
 
 def format_image(fullItem):
     url = fullItem['PictureDetails']['PictureURL'][0]
-    return f'=IMAGE("{url}")'
+    value = f'=IMAGE("{url}")'
+
+    return {
+        'value': value,
+        'preview': url,
+    }
 
 
 ### Pull Listing Item Data ###
