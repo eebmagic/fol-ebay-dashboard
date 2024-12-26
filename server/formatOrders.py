@@ -37,6 +37,7 @@ def reduce_single_order(order, token):
         daysListed = (dateSold - dateListed).days
 
         row = {
+            'id':                   order['orderId'],
             'Title':                titleObject,
             'Image':                imageObject,
             'Date Sold':            order['creationDate'],  # TODO: Date formatting
