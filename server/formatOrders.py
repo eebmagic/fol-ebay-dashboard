@@ -5,6 +5,9 @@ import utils
 import ebayApi
 import auth
 
+def formatDate(date):
+    return date.strftime('%m/%d/%Y')
+
 def reduce_multi_order(order, token):
     '''
     Reduce an order that has multiple line items
@@ -40,8 +43,8 @@ def reduce_single_order(order, token):
             'id':                   order['orderId'],
             'Title':                titleObject,
             'Image':                imageObject,
-            'Date Sold':            order['creationDate'],  # TODO: Date formatting
-            'Date Listed':          fullItem['ListingDetails']['StartTime'],  # TODO: Date formatting
+            'Date Sold':            formatDate(dateSold),
+            'Date Listed':          formatDate(dateListed),
             'Total Days Listed':    daysListed,
             'Total Sold Price':     order['totalFeeBasisAmount']['value'],
             # For some reason, not all orders/items have a key for ebayCollectAndRemitTaxes,
@@ -55,6 +58,8 @@ def reduce_single_order(order, token):
             'Discount':             (order['pricingSummary']['adjustment']['value']
                                      if 'adjustment' in order['pricingSummary']
                                      else 0),
+            'Accepted Price':       item['lineItemCost']['value'],
+            'Shipping (Paid)':      order['pricingSummary']['deliveryCost']['value'],
         }
 
         return row
