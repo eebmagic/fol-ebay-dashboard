@@ -5,6 +5,7 @@ import json
 # Library imports
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import asyncio
 
 # Local imports
 import auth
@@ -93,7 +94,8 @@ def view_data():
         response = ebayApi.get_orders(token, start_date=start_date, end_date=end_date)
         orders = response['orders']
         orders = orders[-5:] # TODO: TEMPORARY: only get 5 orders
-        orders = formatOrders.format_orders(orders=orders, token=token)
+        orders = asyncio.run(formatOrders.format_orders(orders=orders, token=token)) # TODO: Make this async
+
 
         return jsonify({'message': 'success', 'orders': orders})
 

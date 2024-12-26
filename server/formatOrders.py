@@ -1,9 +1,8 @@
 import json
-import pandas as pd
 from datetime import datetime
 import utils
 import ebayApi
-import auth
+import asyncio
 
 def formatDate(date):
     if type(date) == str:
@@ -27,7 +26,7 @@ def reduce_multi_order(order, token):
 
     return [row]
 
-def reduce_single_order(order, token):
+async def reduce_single_order(order, token):
     '''
     Reduce an order that has a single line item
     '''
@@ -35,11 +34,11 @@ def reduce_single_order(order, token):
     try:
         item = order['lineItems'][0]
         print(f'Expanding data for this order: {json.dumps(order, indent=2)}')
-        fullItem = ebayApi.get_item(token, item['legacyItemId'])
+        fullItem = await ebayApi.get_item(token, item['legacyItemId'])
     except Exception as e:
         print(f'Error getting full item for order: {e}')
         print(f'failed to get full item details for the order. Likely because it is archived.')
-        pass
+        fullItem = None
 
     try:
         titleObject = utils.format_url(item['title'], item['legacyItemId'])
@@ -84,32 +83,16 @@ def reduce_single_order(order, token):
         print('\nORDER', order.keys())
         raise
 
-
-def format_orders(orders, token):
-    rows = []
+async def format_orders(orders, token):
+    tasks = []
     for order in orders:
         if len(order['lineItems']) > 1:
             result = reduce_multi_order(order=order, token=token)
-            rows.extend(result)
+            tasks.extend(result)
         else:
-            rows.append(reduce_single_order(order=order, token=token))
+            task = asyncio.create_task(reduce_single_order(order=order, token=token))
+            tasks.append(task)
 
-    return rows
-
-
-if __name__ == '__main__':
-    with open('sample-data/orders_sample.json') as file:
-        data = json.load(file)
-    print(type(data))
-    print(data.keys())
-    print(f'DATA HAS {len(data["orders"])} ORDERS')
-
-    rowData = format_orders(data['orders'])
-    df = pd.DataFrame(rowData)
-    print(df)
-
-    import pyperclip
-
-    tsv_string = df.head(3).to_csv(sep='\t', index=False)
-    pyperclip.copy(tsv_string)
-    print('COPIED TO CLIPBOARD')
+    results = await asyncio.gather(*tasks)
+    # return [r for r in results if r is not None]
+    return results

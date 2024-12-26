@@ -7,6 +7,7 @@ from datetime import datetime
 from oauthclient.credentialutil import credentialutil
 from oauthclient.oauth2api import oauth2api
 from oauthclient.model.model import environment
+import aiohttp
 
 creds = credentialutil()
 creds.load(os.path.join(os.path.dirname(__file__), 'config.yaml'))
@@ -53,7 +54,7 @@ def get_orders(token, start_date=None, end_date=None):
 
     return response.json()
 
-def get_item(token, item_id):
+async def get_item(token, item_id):
     url = 'https://api.ebay.com/ws/api.dll'
 
     headers = {
@@ -71,13 +72,15 @@ def get_item(token, item_id):
     <ItemID>{item_id}</ItemID>
 </GetItemRequest>'''
 
-    response = requests.post(url, headers=headers, data=xml_request)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, data=xml_request) as response:
+            if response.status != 200:
+                raise Exception(f'Failed to get item: {response.status} {await response.text()}')
 
-    if (not response.ok) or (response.status_code != 200):
-        raise Exception(f'Failed to get item: {response.status_code} {response.text}')
+            response_text = await response.text()
 
     # Convert XML response to JSON
-    response_dict = xmltodict.parse(response.text)
+    response_dict = xmltodict.parse(response_text)
     if response_dict['GetItemResponse']['Ack'] != 'Success':
         # raise Exception(f'Failed to get item: {response_dict["GetItemResponse"]["Errors"]}')
         return None
