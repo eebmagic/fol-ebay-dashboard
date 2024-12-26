@@ -3,7 +3,7 @@ import xmltodict
 import yaml
 import os
 import json
-
+from datetime import datetime
 from oauthclient.credentialutil import credentialutil
 from oauthclient.oauth2api import oauth2api
 from oauthclient.model.model import environment
@@ -33,14 +33,20 @@ def generate_login_url():
 
 ### Endpoint Interactions ###
 
-def get_orders(token):
+def get_orders(token, start_date=None, end_date=None):
     url = 'https://api.ebay.com/sell/fulfillment/v1/order'
     headers = {
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json'
     }
 
-    response = requests.get(url, headers=headers)
+    params = {}
+    if start_date and end_date:
+        params['filter'] = requests.utils.quote(f'creationdate:[{start_date}..{end_date}]')
+    elif start_date and not end_date:
+        params['filter'] = requests.utils.quote(f'creationdate:[{start_date}..{datetime.now().isoformat()}]')
+
+    response = requests.get(url, headers=headers, params=params)
 
     if (not response.ok) or (response.status_code != 200):
         raise Exception(f'Failed to get orders: {response.status_code} {response.text}')

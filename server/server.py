@@ -78,6 +78,9 @@ def view_data():
         if not session_id:
             return jsonify({'error': 'No session_id provided'}), 400
 
+        start_date = request.args.get('startDate')
+        end_date = request.args.get('endDate')
+
         # Get latest token for the session
         session_result = auth.check_session(session_id)
         if 'success' not in session_result or not session_result['success']:
@@ -87,7 +90,8 @@ def view_data():
         token = session_data['access_token']
 
         # Make request to get orders and then return them
-        orders = ebayApi.get_orders(token)['orders']
+        response = ebayApi.get_orders(token, start_date=start_date, end_date=end_date)
+        orders = response['orders']
         orders = orders[-5:] # TODO: TEMPORARY: only get 5 orders
         orders = formatOrders.format_orders(orders=orders, token=token)
 
