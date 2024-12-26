@@ -48,7 +48,7 @@ export const fetchSignInUrl = async () => {
   return data.url;
 };
 
-export const fetchData = async (sessionId) => {
+export const fetchData = async (sessionId, startDate, endDate) => {
   if (!sessionId) {
     console.log('Can\'t get data because session id is: ', sessionId);
     return;
@@ -56,6 +56,12 @@ export const fetchData = async (sessionId) => {
 
   const url = new URL(`${API_BASE_URL}/viewData`);
   url.searchParams.set('sessionId', sessionId);
+  if (startDate) {
+    url.searchParams.set('startDate', startDate);
+    if (endDate) {
+      url.searchParams.set('endDate', endDate);
+    }
+  }
 
   const response = await fetch(url, {
     method: 'GET',

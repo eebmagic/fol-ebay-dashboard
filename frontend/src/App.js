@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { PrimeReactProvider } from 'primereact/api';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
+import { Calendar } from 'primereact/calendar';
 
 import { login, fetchSignInUrl, fetchData } from './helpers/api';
 import DataView from './components/DataView';
@@ -16,8 +17,10 @@ function App() {
   const [isFailed, setIsFailed] = useState(false);
   const [sessionId, setSessionId] = useState(null);
 
-  const [orders, setOrders] = useState([]);
+  const [dateRange, setDateRange] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -64,14 +67,19 @@ function App() {
       console.log(`Saving sessionId to local storage: ${sessionId}`);
       localStorage.setItem('sessionId', sessionId);
     }
-    buttonFunc(); // TODO: Remove this. Just avoids an extra click during dev.
+    getDataFunc(); // TODO: Remove this. Just avoids an extra click during dev.
   }, [sessionId]);
 
-  const buttonFunc = async () => {
+  const getDataFunc = async () => {
     console.log('Getting order data ...');
+    console.log('dateRange', dateRange);
     setIsLoading(true);
     try {
-      const orderResponse = await fetchData(sessionId)
+      const orderResponse = await fetchData(
+        sessionId,
+        dateRange[0].toISOString(),
+        dateRange[1] ? dateRange[1].toISOString() : null
+      );
       setIsLoading(false);
 
       console.log('orderResponse', orderResponse);
@@ -104,12 +112,35 @@ function App() {
               isLoading ? <marquee>Loading...</marquee> : null
             }
           </div>
+          <div className="dateRange">
+            <label htmlFor="dateRange">Date Range: </label>
+            <Calendar
+              value={dateRange}
+              onChange={(e) => {
+                setDateRange(e.value)
+                console.log('dateRange', dateRange);
+              }}
+              selectionMode="range"
+              showWeek
+              dateFormat="mm/dd/yy"
+              showIcon
+            />
+            <Button
+              onClick={() => setDateRange(null)}
+              label="Clear"
+              icon="pi pi-times"
+              severity="secondary"
+              size="small"
+              raised
+              rounded
+            />
+          </div>
+          <div>
+            <Button label="Pull Orders" onClick={getDataFunc} icon="pi pi-cloud-download" />
+          </div>
           <DataView orders={orders} toast={toast} />
         {(sessionId !== null && sessionId !== undefined) ? (
           <div>
-            <div>
-              <Button label="GET DATA" onClick={buttonFunc} />
-            </div>
             <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p>
             <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
             <Button label="RESET" onClick={reset} />
