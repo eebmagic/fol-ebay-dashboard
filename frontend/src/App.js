@@ -3,8 +3,6 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { PrimeReactProvider } from 'primereact/api';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
 
 import { login, fetchSignInUrl, fetchData } from './helpers/api';
 import DataView from './components/DataView';
@@ -20,11 +18,13 @@ function App() {
 
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const foundSessionId = localStorage.getItem('sessionId');
-    if (foundSessionId) {
+    if (foundSessionId && typeof foundSessionId === 'string') {
       setSessionId(foundSessionId);
+      return;
     }
 
     if (params.get('isAuthSuccessful') === 'true' && params.get('code')) {
@@ -34,19 +34,38 @@ function App() {
     }
   }, []);
 
-  const handleSuccessfulAuth = async (code) => {
-    console.log('Got EBay code');
-    console.log(code);
-
-    setCode(code);
-
-    // TODO: Send code to backend to get sessionId
+  /**
+   * Delete the sessionId from local storage and set it to null here.
+   */
+  const reset = () => {
+    localStorage.removeItem('sessionId');
+    setSessionId(null);
+    setCode(null);
+    setOrders([]);
   }
 
-  useMemo(() => {
-    login({code, sessionId});
-  }, [code, sessionId]);
+  const handleSuccessfulAuth = async (code) => {
+    console.log('Got EBay code', code);
+    setCode(code);
+    // This triggers the useMemo hook below.
+  }
 
+  useMemo(async () => {
+    console.log(`Logging in with code: ${code} and sessionId: ${sessionId}`);
+    const loginResultSessionId = await login({code, sessionId});
+    if (loginResultSessionId && typeof loginResultSessionId === 'string') {
+      setSessionId(loginResultSessionId);
+      // This triggers the useEffect hook below.
+    }
+  }, [code]);
+
+  useEffect(() => {
+    if (sessionId !== null && sessionId !== undefined) {
+      console.log(`Saving sessionId to local storage: ${sessionId}`);
+      localStorage.setItem('sessionId', sessionId);
+    }
+    buttonFunc(); // TODO: Remove this. Just avoids an extra click during dev.
+  }, [sessionId]);
 
   const buttonFunc = async () => {
     console.log('Getting order data ...');
@@ -73,14 +92,6 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    console.log('orders state changed', orders);
-  }, [orders]);
-
-  useEffect(() => {
-    // TODO: Check if this is actually working, else remove it.
-    buttonFunc();
-  }, []); // Empty dependency array means this only runs once on mount
 
   return (
     <PrimeReactProvider>
@@ -94,32 +105,35 @@ function App() {
             }
           </div>
           <DataView orders={orders} toast={toast} />
-        {sessionId ? (
+        {(sessionId !== null && sessionId !== undefined) ? (
           <div>
             <div>
               <Button label="GET DATA" onClick={buttonFunc} />
             </div>
             <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p>
             <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
-            <button onClick={() => window.location.href = '/'}>RESET</button>
+            <Button label="RESET" onClick={reset} />
           </div>
         ) : code ? (
           <div>
             <p style={{color: 'orange'}}><i>Received code from eBay!</i></p>
             <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>Code: {code}</p>
             {/* Take this out later */}
-            <Button label="RESET" onClick={() => window.location.href = '/'} />
+            <Button label="RESET" onClick={reset} />
           </div>
         ) : isFailed ? (
           <div>
             <p style={{color: 'red'}}><i>Failed to authenticate with eBay!</i></p>
             <p>Try clearing out the url and signing in again.</p>
-            <Button label="RESET" onClick={() => window.location.href = '/'} />
+            <Button label="RESET" onClick={reset} />
           </div>
         ) : (
           <>
             <p>Click the button below to sign in with eBay</p>
-            <Button label="Sign in with eBay" onClick={fetchSignInUrl} />
+            <Button label="Sign in with eBay" onClick={async () => {
+              const url = await fetchSignInUrl();
+              window.location.href = url;
+            }} />
           </>
         )}
       </header>
