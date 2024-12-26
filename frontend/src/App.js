@@ -77,8 +77,8 @@ function App() {
     try {
       const orderResponse = await fetchData(
         sessionId,
-        dateRange[0].toISOString(),
-        dateRange[1] ? dateRange[1].toISOString() : null
+        (dateRange && dateRange[0]) ? dateRange[0].toISOString() : null,
+        (dateRange && dateRange[1]) ? dateRange[1].toISOString() : null
       );
       setIsLoading(false);
 
