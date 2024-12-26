@@ -6,6 +6,9 @@ import ebayApi
 import auth
 
 def formatDate(date):
+    if type(date) == str:
+        return date
+
     return date.strftime('%m/%d/%Y')
 
 def reduce_multi_order(order, token):
@@ -28,16 +31,28 @@ def reduce_single_order(order, token):
     '''
     Reduce an order that has a single line item
     '''
-    item = order['lineItems'][0]
-    print(f'Expanding data for this order: {json.dumps(order, indent=2)}')
-    fullItem = ebayApi.get_item(token, item['legacyItemId'])
+
+    try:
+        item = order['lineItems'][0]
+        print(f'Expanding data for this order: {json.dumps(order, indent=2)}')
+        fullItem = ebayApi.get_item(token, item['legacyItemId'])
+    except Exception as e:
+        print(f'Error getting full item for order: {e}')
+        print(f'failed to get full item details for the order. Likely because it is archived.')
+        pass
 
     try:
         titleObject = utils.format_url(item['title'], item['legacyItemId'])
-        imageObject = utils.format_image(fullItem)
         dateSold = datetime.strptime(order['creationDate'], '%Y-%m-%dT%H:%M:%S.%fZ')
-        dateListed = datetime.strptime(fullItem['ListingDetails']['StartTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
-        daysListed = (dateSold - dateListed).days
+
+        if fullItem:
+            imageObject = utils.format_image(fullItem)
+            dateListed = datetime.strptime(fullItem['ListingDetails']['StartTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            daysListed = (dateSold - dateListed).days
+        else:
+            imageObject = 'image not found'
+            dateListed = 'date not found'
+            daysListed = 'listing date not found'
 
         row = {
             'id':                   order['orderId'],

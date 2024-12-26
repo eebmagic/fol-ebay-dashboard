@@ -72,6 +72,10 @@ def get_item(token, item_id):
 
     # Convert XML response to JSON
     response_dict = xmltodict.parse(response.text)
+    if response_dict['GetItemResponse']['Ack'] != 'Success':
+        # raise Exception(f'Failed to get item: {response_dict["GetItemResponse"]["Errors"]}')
+        return None
+
     response_dict = response_dict['GetItemResponse']['Item']
 
     return response_dict
