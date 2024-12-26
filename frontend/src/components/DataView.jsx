@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { InputSwitch } from 'primereact/inputswitch';
 import { Button } from 'primereact/button';
-import { SplitButton } from 'primereact/splitbutton';
-import { Toast } from 'primereact/toast';
+import { Dialog } from 'primereact/dialog';
+
 import './DataView.css';
+import ListModal from './ListModal';
+import { buildClipobard, DEFAULT_COLUMNS } from './buildUtil';
 
 function DataView({ orders, toast }) {
   const [selectedOrders, setSelectedOrders] = useState([]);
-  // const [rowClick, setRowClick] = useState(true);
+  const [columns, setColumns] = useState(DEFAULT_COLUMNS);
+  const [showColumns, setShowColumns] = useState(false);
 
   useEffect(() => {
     console.log('selectedOrders', selectedOrders);
@@ -30,15 +32,23 @@ function DataView({ orders, toast }) {
 
     console.log(`Building output for orders`, workingSelection);
 
+    const result = buildClipobard(workingSelection, columns);
 
-
-    // toast.current.show({
-    //   severity: 'success',
-    //   summary: 'Copied to clipboard',
-    //   detail: `${workingSelection.length} order(s)`,
-    //   life: 1000
-    // });
-
+    if (result === true) {
+      toast.current.show({
+        severity: 'success',
+        summary: 'Copied to clipboard',
+        detail: `${workingSelection.length} order(s)`,
+        life: 2000
+      });
+    } else {
+      toast.current.show({
+        severity: 'error',
+        summary: 'Failed to copy to clipboard',
+        detail: result,
+        life: 2000
+      });
+    }
   };
 
   console.log('First order:', orders[0]);
@@ -66,13 +76,13 @@ function DataView({ orders, toast }) {
               onClick={buildButtonFunc}
               label="Copy"
               icon="pi pi-copy"
-              // dropdownIcon="pi pi-cog"
               severity="success"
               size="large"
               raised
               rounded
             />
             <Button
+              onClick={() => setShowColumns(true)}
               icon="pi pi-cog"
               severity="secondary"
               size="large"
@@ -83,6 +93,13 @@ function DataView({ orders, toast }) {
         </div>
       ) : <p>No orders found</p>}
 
+      <Dialog
+        header="Edit Column Order"
+        visible={showColumns}
+        onHide={() => setShowColumns(false)}
+      >
+        <ListModal columns={columns} setColumns={setColumns} />
+      </Dialog>
 
     </div>
   );
