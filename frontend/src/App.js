@@ -7,6 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
 import { login, fetchSignInUrl, fetchData } from './helpers/api';
+import DataView from './components/DataView';
 
 import './App.css';
 
@@ -76,15 +77,10 @@ function App() {
     console.log('orders state changed', orders);
   }, [orders]);
 
-  const imageBodyTemplate = (rowData) => {
-    const size = '60px';
-    return <img
-      src={rowData.Image.preview}
-      alt={rowData.Title.preview}
-      style={{width: size, height: size, objectFit: 'contain'}}
-      key={rowData.Image.preview}
-    />
-  }
+  useEffect(() => {
+    // TODO: Check if this is actually working, else remove it.
+    buttonFunc();
+  }, []); // Empty dependency array means this only runs once on mount
 
   return (
     <PrimeReactProvider>
@@ -94,33 +90,18 @@ function App() {
           <div style={{ maxWidth: '300px' }}>
             {
               // eslint-disable-next-line jsx-a11y/no-distracting-elements
-              isLoading ? <marquee>Loading...</marquee> : <p>Not loading</p>
+              isLoading ? <marquee>Loading...</marquee> : null
             }
           </div>
-          <div name="orders">
-            {(orders && orders.length > 0) ? (
-              <DataTable value={orders}>
-                <Column field="Image.preview" header="Image" body={imageBodyTemplate} />
-                <Column field="Title.preview" header="Title" />
-                <Column field="Date Sold" header="Date Sold" />
-              </DataTable>
-            ) : <p>No orders found</p>}
-          </div>
+          <DataView orders={orders} toast={toast} />
         {sessionId ? (
           <div>
-            <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p>
-            <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
-            <button onClick={() => window.location.href = '/'}>RESET</button>
             <div>
               <Button label="GET DATA" onClick={buttonFunc} />
             </div>
-            <div>
-              {orders ? orders.map((order) => (
-                <div key={order.orderId}>
-                  <p>{order.orderId}</p>
-                </div>
-              )) : <p>No orders found</p>}
-            </div>
+            <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p>
+            <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
+            <button onClick={() => window.location.href = '/'}>RESET</button>
           </div>
         ) : code ? (
           <div>

@@ -1,0 +1,24 @@
+.orders-container {
+    width: 80%;  /* or any specific width like 800px */
+    margin: 0 auto;  /* centers the container */
+    max-width: 1200px;  /* prevents table from getting too wide on large screens */
+}
+
+.realOrders {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.buttonRow {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+}
+
+.p-datatable {
+    /* Override PrimeReact's default table styles if needed */
+    width: 100%;
+} 
