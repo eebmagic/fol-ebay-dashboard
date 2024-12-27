@@ -96,8 +96,8 @@ def view_data():
         orders = orders[-5:] # TODO: TEMPORARY: only get 5 orders
         orders = asyncio.run(formatOrders.format_orders(orders=orders, token=token)) # TODO: Make this async
 
-
-        return jsonify({'message': 'success', 'orders': orders})
+        payload = jsonify({'message': 'success', 'orders': orders})
+        return payload
 
     except Exception as e:
         import traceback
