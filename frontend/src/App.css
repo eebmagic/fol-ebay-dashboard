@@ -17,11 +17,19 @@
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.coreBox {
+  gap: 1rem;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
 .App-link {
@@ -37,9 +45,30 @@
   }
 }
 
-.dateRange {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    align-items: center;
+.primarySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
 }
+
+.dateRange {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}
+
+.successFooter {
+  position: absolute;
+  top: auto;
+  bottom: 1rem;
+  margin: auto;
+}
+
+.resetFooter {
+  margin-top: auto;
+  align-self: flex-end;
+  padding: 1rem;
+}
+
