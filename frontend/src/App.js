@@ -103,75 +103,91 @@ function App() {
     }
   }
 
+  const primarySection = (
+    <div className="primarySection">
+      <div className="dateRange">
+        <label htmlFor="dateRange">Date Range: </label>
+        <Calendar
+          value={dateRange}
+          onChange={(e) => {
+            setDateRange(e.value)
+            console.log('dateRange', dateRange);
+          }}
+          selectionMode="range"
+          showWeek
+          dateFormat="mm/dd/yy"
+          showIcon
+        />
+        <Button label="Pull Orders" onClick={getDataFunc} icon="pi pi-cloud-download" />
+      </div>
+      <DataView orders={orders} toast={toast} />
+    </div>
+  );
+
+
+  const loginPrompt = (
+    <div className="loginPrompt">
+      <p>Click the button below to sign in with eBay</p>
+      <Button label="Sign in with eBay" onClick={async () => {
+        const url = await fetchSignInUrl();
+        window.location.href = url;
+      }} />
+    </div>
+  );
+
+  const failPrompt = (
+    <div className="failPrompt">
+      <p style={{color: 'red'}}><i>Failed to authenticate with eBay!</i></p>
+      <p>Try clearing out the url and signing in again.</p>
+    </div>
+  );
+
+  const successFooter = (
+    <div className="successFooter">
+      {/* <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p> */}
+      <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
+    </div>
+  );
+
+  const resetFooter = (
+    <div className="resetFooter">
+      <Button label="RESET" onClick={reset} icon="pi pi-fast-backward" severity="danger" />
+    </div>
+  );
+
+  const mainPath = () => {
+    if (!sessionId && !code) {
+      return loginPrompt;
+    }
+
+    if (isFailed) {
+      return failPrompt;
+    }
+
+    return successFooter;
+  };
 
   return (
     <PrimeReactProvider>
       <div className="App">
         <header className="App-header">
           <Toast ref={toast} />
-          <div style={{ maxWidth: '300px' }}>
-            {
-              // eslint-disable-next-line jsx-a11y/no-distracting-elements
-              isLoading ? <marquee>Loading...</marquee> : null
-            }
+          <div className="coreBox">
+            <div style={{ maxWidth: '300px' }}>
+              {
+                // eslint-disable-next-line jsx-a11y/no-distracting-elements
+                isLoading ? <marquee>Loading...</marquee> : null
+              }
+            </div>
+
+            {primarySection}
+
+            {mainPath()}
+
+          {resetFooter}
           </div>
-          <div className="dateRange">
-            <label htmlFor="dateRange">Date Range: </label>
-            <Calendar
-              value={dateRange}
-              onChange={(e) => {
-                setDateRange(e.value)
-                console.log('dateRange', dateRange);
-              }}
-              selectionMode="range"
-              showWeek
-              dateFormat="mm/dd/yy"
-              showIcon
-            />
-            <Button
-              onClick={() => setDateRange(null)}
-              label="Clear"
-              icon="pi pi-times"
-              severity="secondary"
-              size="small"
-              raised
-              rounded
-            />
-          </div>
-          <div>
-            <Button label="Pull Orders" onClick={getDataFunc} icon="pi pi-cloud-download" />
-          </div>
-          <DataView orders={orders} toast={toast} />
-        {(sessionId !== null && sessionId !== undefined) ? (
-          <div>
-            <p style={{color: 'green'}}><i>Received sessionId from eBay!</i></p>
-            <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>SessionId: {sessionId}</p>
-            <Button label="RESET" onClick={reset} />
-          </div>
-        ) : code ? (
-          <div>
-            <p style={{color: 'orange'}}><i>Received code from eBay!</i></p>
-            <p style={{fontSize: '0.4em', fontFamily: 'monospace'}}>Code: {code}</p>
-            {/* Take this out later */}
-            <Button label="RESET" onClick={reset} />
-          </div>
-        ) : isFailed ? (
-          <div>
-            <p style={{color: 'red'}}><i>Failed to authenticate with eBay!</i></p>
-            <p>Try clearing out the url and signing in again.</p>
-            <Button label="RESET" onClick={reset} />
-          </div>
-        ) : (
-          <>
-            <p>Click the button below to sign in with eBay</p>
-            <Button label="Sign in with eBay" onClick={async () => {
-              const url = await fetchSignInUrl();
-              window.location.href = url;
-            }} />
-          </>
-        )}
-      </header>
-    </div>
+        </header>
+      </div>
     </PrimeReactProvider>
   );
 }
