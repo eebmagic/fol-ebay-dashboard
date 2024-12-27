@@ -59,6 +59,9 @@ export const fetchData = async (sessionId, startDate, endDate) => {
   if (startDate) {
     url.searchParams.set('startDate', startDate);
     if (endDate) {
+      // Cap endDate to current time to avoid future dates
+      const now = new Date().toISOString();
+      endDate = endDate > now ? now : endDate;
       url.searchParams.set('endDate', endDate);
     }
   }
@@ -69,7 +72,14 @@ export const fetchData = async (sessionId, startDate, endDate) => {
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    try {
+      const errorData = await response.json();
+      if (errorData) {
+        return errorData;
+      }
+    } catch {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
   }
 
   const data = await response.json();

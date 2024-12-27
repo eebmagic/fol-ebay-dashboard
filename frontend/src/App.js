@@ -88,9 +88,15 @@ function App() {
       console.log('orderResponse', orderResponse);
       if (orderResponse.message) {
         toast.current.show({
-          severity: orderResponse.message === 'success' ? 'success' : 'error',
-          summary: orderResponse.message === 'success' ? 'Success!' : 'Error',
-          detail: orderResponse.message === 'success' ? `Pulled ${orderResponse.orders.length} orders` : orderResponse.message,
+          severity: 'success',
+          summary: 'Success!',
+          detail: `Pulled ${orderResponse.orders.length} orders`,
+        });
+      } else if (orderResponse.error) {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error',
+          detail: orderResponse.error,
         });
       }
 
