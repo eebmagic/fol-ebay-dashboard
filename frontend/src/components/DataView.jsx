@@ -67,8 +67,8 @@ function DataView({ orders, toast }) {
           >
             <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
             <Column field="Image.preview" header="Image" body={imageBodyTemplate} />
-            <Column field="Title.preview" header="Title" />
-            <Column field="Date Sold" header="Date Sold" />
+            <Column field="Title.preview" header="Title" sortable />
+            <Column field="Date Sold" header="Date Sold" sortable />
           </DataTable>
 
           <div className="buttonRow">
