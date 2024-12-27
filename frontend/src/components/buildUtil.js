@@ -8,7 +8,7 @@ const handleRow = (order, columns) => {
 
     const columnValue = order[column];
     if (columnValue === undefined) {
-      return 'NOT FOUND';
+      return '';
     }
 
     if (typeof columnValue === 'object') {
@@ -53,9 +53,6 @@ export const DEFAULT_COLUMNS = [
   'Date Sold',
   'Total Days Listed',
   'Accepted Price',
-  'Order #',
-  'Tracking #',
-  'Offer',
   'Total Sold Price',
   'Tax',
   'Fees',
