@@ -3,7 +3,7 @@ import xmltodict
 import yaml
 import os
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from oauthclient.credentialutil import credentialutil
 from oauthclient.oauth2api import oauth2api
 from oauthclient.model.model import environment
@@ -45,7 +45,7 @@ def get_orders(token, start_date=None, end_date=None):
     if start_date and end_date:
         params['filter'] = requests.utils.quote(f'creationdate:[{start_date}..{end_date}]')
     elif start_date and not end_date:
-        params['filter'] = requests.utils.quote(f'creationdate:[{start_date}..{datetime.now().isoformat()}]')
+        params['filter'] = requests.utils.quote(f'creationdate:[{start_date}..{datetime.now(UTC).isoformat()}]')
 
     response = requests.get(url, headers=headers, params=params)
 

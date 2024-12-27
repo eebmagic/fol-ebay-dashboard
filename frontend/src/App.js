@@ -10,6 +10,9 @@ import DataView from './components/DataView';
 
 import './App.css';
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_DATE = new Date(Date.now() - (7 * DAY_MS));
+
 function App() {
   const toast = useRef(null);
 
@@ -17,7 +20,7 @@ function App() {
   const [isFailed, setIsFailed] = useState(false);
   const [sessionId, setSessionId] = useState(null);
 
-  const [dateRange, setDateRange] = useState(null);
+  const [dateRange, setDateRange] = useState([DEFAULT_DATE, null]);
   const [isLoading, setIsLoading] = useState(false);
 
   const [orders, setOrders] = useState([]);
@@ -77,7 +80,7 @@ function App() {
     try {
       const orderResponse = await fetchData(
         sessionId,
-        (dateRange && dateRange[0]) ? dateRange[0].toISOString() : null,
+        (dateRange && dateRange[0]) ? dateRange[0].toISOString() : DEFAULT_DATE.toISOString(),
         (dateRange && dateRange[1]) ? dateRange[1].toISOString() : null
       );
       setIsLoading(false);

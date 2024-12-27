@@ -3,7 +3,7 @@ Handles the authentication sessions for users.
 '''
 import json
 import os
-from datetime import datetime
+from datetime import datetime, UTC
 import ebayApi
 
 SESSIONS_FILE = os.path.join(os.path.dirname(__file__), 'data/sessions.json')
@@ -61,9 +61,9 @@ def check_session(sessionId):
 
 
 def refresh_session(sessionId, sessionData):
-    current_time = datetime.now()
-    token_expiry = datetime.fromisoformat(sessionData['token_expiry'])
-    refresh_expiry = datetime.fromisoformat(sessionData['refresh_token_expiry'])
+    current_time = datetime.now(UTC)
+    token_expiry = datetime.fromisoformat(sessionData['token_expiry']).replace(tzinfo=UTC)
+    refresh_expiry = datetime.fromisoformat(sessionData['refresh_token_expiry']).replace(tzinfo=UTC)
 
     # Session NOT YET expired, return the current session
     if current_time < token_expiry:
