@@ -20,10 +20,10 @@ function DataView({ orders, toast }) {
   const imageBodyTemplate = (rowData) => {
     const size = '60px';
     return <img
-      src={rowData.Image.preview}
-      alt={rowData.Title.preview}
+      src={rowData.Image?.preview ? rowData.Image.preview : null}
+      alt={rowData.Title?.preview ? rowData.Title.preview : null}
       style={{width: size, height: size, objectFit: 'contain'}}
-      key={rowData.Image.preview}
+      key={rowData.Image?.preview ? rowData.Image.preview : null}
     />
   };
 
