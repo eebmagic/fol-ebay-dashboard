@@ -27,6 +27,10 @@ function DataView({ orders, toast }) {
     />
   };
 
+  const titleBodyTemplate = (rowData) => {
+    return rowData.Title?.preview ? <a href={rowData.Title.url} target="_blank" rel="noopener noreferrer">{rowData.Title.preview}</a> : null;
+  };
+
   const buildButtonFunc = () => {
     const workingSelection = (selectedOrders && selectedOrders.length > 0) ? selectedOrders : orders;
 
@@ -67,7 +71,7 @@ function DataView({ orders, toast }) {
           >
             <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
             <Column field="Image.preview" header="Image" body={imageBodyTemplate} />
-            <Column field="Title.preview" header="Title" sortable />
+            <Column field="Title.preview" header="Title" body={titleBodyTemplate} sortable />
             <Column field="Date Sold" header="Date Sold" sortable />
           </DataTable>
 

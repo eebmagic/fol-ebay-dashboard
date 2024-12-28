@@ -9,6 +9,7 @@ def format_url(title, legacyItemId):
     return {
         'value': value,
         'preview': title,
+        'url': f'https://www.ebay.com/itm/{legacyItemId}',
     }
 
 def format_image(fullItem):
