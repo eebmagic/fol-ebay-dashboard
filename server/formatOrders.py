@@ -56,31 +56,45 @@ async def update_cache(order_id, data):
 
 ### Handlers
 
-def reduce_multi_order(order, token):
+async def reduce_multi_order(order, token):
     '''
     Reduce an order that has multiple line items
     '''
-    row = {
-        'Title':                'TODO: would be multi-order result',
-        'Date Sold':            '',
-        'Total Sold Price':     '',
-        'Tax':                  '',
-        'Fees':                 '',
-        'Shipping (User Paid)': '',
-        'Discount':             '',
-    }
+    # Get full row for each item
+    rows = []
+    for i in range(len(order['lineItems'])):
+        row = await reduce_single_order(order=order, token=token, idx=i, updateCache=False)
+        rows.append(row)
 
-    return [row]
+    # Remove redundant columns for secondary rows
+    REMOVE_COLS = [
+        'Total Sold Price',
+        'Tax',
+        'Fees',
+        'Shipping (Paid)',
+    ]
+    cleaned_rows = []
+    for i, row in enumerate(rows):
+        if i == 0:
+            cleaned_rows.append(row)
+        else:
+            copy = {key: value for key, value in row.items() if key not in REMOVE_COLS}
+            cleaned_rows.append(copy)
 
-async def reduce_single_order(order, token):
+    # Cache the full result
+    await update_cache(order['orderId'], cleaned_rows)
+
+    # Return result
+    return cleaned_rows
+
+async def reduce_single_order(order, token, idx=0, updateCache=True):
     '''
     Reduce an order that has a single line item
     '''
 
     try:
-        item = order['lineItems'][0]
-        # print(f'Expanding data for this order: {json.dumps(order, indent=2)}')
-        print(f'Expanding data for order')
+        item = order['lineItems'][idx]
+        print(f'Expanding data for order: {order["orderId"]}')
         fullItem = await ebayApi.get_item(token, item['legacyItemId'])
     except Exception as e:
         print(f'Error getting full item for order: {e}')
@@ -125,11 +139,12 @@ async def reduce_single_order(order, token):
         }
 
         # Update cache
-        updated = await update_cache(order_id, row)
-        if not updated:
-            print(f'FAILED TO UPDATE CACHE: for order: {order_id}')
-        else:
-            print(f'updated cache for order: {order_id}')
+        if updateCache:
+            updated = await update_cache(order_id, row)
+            if not updated:
+                print(f'FAILED TO UPDATE CACHE: for order: {order_id}')
+            else:
+                print(f'Updated cache for order: {order_id}')
 
         return row
     except KeyError as e:
@@ -147,18 +162,25 @@ async def format_orders(orders, token):
         order_id = order['orderId']
         cache_result = await check_cache(order_id)
         if cache_result:
-            print(f'Found cache for {order_id}')
+            print(f'Cache hit for {order_id}')
             # Wrap the cache result in a completed future instead of adding directly
             tasks.append(asyncio.create_task(asyncio.sleep(0, result=cache_result)))
             continue
 
         if len(order['lineItems']) > 1:
-            result = reduce_multi_order(order=order, token=token)
-            # Wrap multi-order results in completed futures
-            tasks.extend([asyncio.create_task(asyncio.sleep(0, result=r)) for r in result])
+            task = asyncio.create_task(reduce_multi_order(order=order, token=token))
+            tasks.append(task)
         else:
             task = asyncio.create_task(reduce_single_order(order=order, token=token))
             tasks.append(task)
     
-    results = await asyncio.gather(*tasks)
+    gathered = await asyncio.gather(*tasks)
+
+    results = []
+    for row in gathered:
+        if isinstance(row, list):
+            results.extend(row)
+        else:
+            results.append(row)
+
     return results
