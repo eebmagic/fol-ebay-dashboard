@@ -70,7 +70,7 @@ function App() {
       console.log(`Saving sessionId to local storage: ${sessionId}`);
       localStorage.setItem('sessionId', sessionId);
     }
-    getDataFunc(); // TODO: Remove this. Just avoids an extra click during dev.
+    // getDataFunc(); // TODO: Remove this. Just avoids an extra click during dev.
   }, [sessionId]);
 
   const getDataFunc = async () => {
