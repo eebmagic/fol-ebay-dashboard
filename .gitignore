@@ -2,4 +2,4 @@ __pycache__/
 **/__init__.py
 config.yaml
 sample-data/
-
+.venv/
