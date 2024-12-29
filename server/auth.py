@@ -103,7 +103,7 @@ def store_session(sessionId, tokenData):
     # Save updated sessions
     os.makedirs(os.path.dirname(SESSIONS_FILE), exist_ok=True)
     with open(SESSIONS_FILE, 'w') as f:
-        json.dump(sessions, f)
+        json.dump(sessions, f, indent=4)
 
     return True
 
@@ -134,7 +134,7 @@ def remove_session(sessionId):
     # Save updated sessions
     os.makedirs(os.path.dirname(SESSIONS_FILE), exist_ok=True)
     with open(SESSIONS_FILE, 'w') as f:
-        json.dump(sessions, f)
+        json.dump(sessions, f, indent=4)
 
     print(f'STORED SESSION: {sessionId}')
 

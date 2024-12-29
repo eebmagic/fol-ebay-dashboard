@@ -51,6 +51,10 @@ def login():
     # Try login with code
     try:
         tokenData = ebayApi.get_token(code).to_json()
+        if not tokenData['access_token']:
+            print(f'Failed to mint token from user code. Got this token data back: {json.dumps(tokenData, indent=2)}')
+            return jsonify({'error': 'Failed to mint token from user code'}), 400
+
         session_id = str(uuid.uuid4())
         auth.store_session(session_id, tokenData)
         payload = {
