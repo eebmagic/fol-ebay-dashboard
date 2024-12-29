@@ -45,10 +45,13 @@ in pkgs.mkShell {
       cd frontend && npm install && cd ..
     fi
 
-    # Print welcome message
-    echo "Development environment ready!"
-    echo "To start the server: cd server && python server.py"
-    echo "To start the frontend: cd frontend && npm start"
+    # Build the frontend directly
+    echo "Building frontend..."
+    (cd frontend && npm run build && cd ..)
+
+    # Start the Python server
+    echo "Starting Python server..."
+    cd server && python server.py
   '';
 
   # Environment variables

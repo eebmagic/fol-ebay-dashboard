@@ -3,7 +3,7 @@ from urllib.parse import quote
 import json
 
 # Library imports
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import asyncio
 
@@ -12,10 +12,18 @@ import auth
 import ebayApi
 import formatOrders
 
-app = Flask(__name__)
+app = Flask(__name__,
+    static_folder='../frontend/build',
+    static_url_path='')
 CORS(app)
 
-@app.route('/signInUrl', methods=['GET'])
+# Serve React App
+@app.route('/')
+def serve():
+    print(f'Serving static files from {app.static_folder}')
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/api/signInUrl', methods=['GET'])
 def get_signin_url():
     '''
     Get the URL that the client should forward the user to in order to get an ebay auth code.
@@ -26,7 +34,7 @@ def get_signin_url():
     payload = {'url': url}
     return jsonify(payload)
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     code = request.json.get('code')
     session_id = request.json.get('sessionId')
@@ -76,7 +84,7 @@ def login():
         return jsonify(payload), 500
 
 
-@app.route('/viewData', methods=['GET'])
+@app.route('/api/viewData', methods=['GET'])
 def view_data():
     try:
         session_id = request.args.get('sessionId')
@@ -110,4 +118,4 @@ def view_data():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=3000)
