@@ -98,7 +98,7 @@ def view_data():
         response = ebayApi.get_orders(token, start_date=start_date, end_date=end_date)
 
         orders = response['orders']
-        orders = asyncio.run(formatOrders.format_orders(orders=orders, token=token)) # TODO: Make this async
+        orders = asyncio.run(formatOrders.format_orders(orders=orders, token=token))
 
         payload = jsonify({'message': 'success', 'orders': orders})
         return payload
