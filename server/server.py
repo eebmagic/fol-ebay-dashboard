@@ -28,8 +28,7 @@ def get_signin_url():
     '''
     Get the URL that the client should forward the user to in order to get an ebay auth code.
     '''
-    # url = ebayApi.generate_login_url()
-    url = 'https://auth.ebay.com/oauth2/authorize?client_id=EthanBol-Testing-PRD-037e7d927-ec1fd3b8&response_type=code&redirect_uri=Ethan_Bolton-EthanBol-Testin-xbaywwy&scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly https://api.ebay.com/oauth/api_scope/sell.finances https://api.ebay.com/oauth/api_scope/sell.payment.dispute https://api.ebay.com/oauth/api_scope/commerce.identity.readonly https://api.ebay.com/oauth/api_scope/sell.reputation https://api.ebay.com/oauth/api_scope/sell.reputation.readonly https://api.ebay.com/oauth/api_scope/commerce.notification.subscription https://api.ebay.com/oauth/api_scope/commerce.notification.subscription.readonly https://api.ebay.com/oauth/api_scope/sell.stores https://api.ebay.com/oauth/api_scope/sell.stores.readonly'
+    url = ebayApi.generate_login_url()
     url = quote(url, safe=':/?=&')
     payload = {'url': url}
     return jsonify(payload)

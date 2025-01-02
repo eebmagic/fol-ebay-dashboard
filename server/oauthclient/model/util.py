@@ -20,7 +20,6 @@ import base64
 
 def _generate_request_headers(credential):
 
-    print(f'encoding this value', (credential.client_id + ':' + credential.client_secret))
     b64_encoded_credential = base64.b64encode((credential.client_id + ':' + credential.client_secret).encode())
     headers = {
             'Content-Type': 'application/x-www-form-urlencoded',

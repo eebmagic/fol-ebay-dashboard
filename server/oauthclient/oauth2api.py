@@ -49,7 +49,6 @@ class oauth2api(object):
         credential = credentialutil.get_credentials(env_type)
 
         scopes = ' '.join(scopes)
-        print(f'joined scopes into: {scopes}')
         param = {
                 'client_id':credential.client_id,
                 'redirect_uri':credential.ru_name,
@@ -99,13 +98,12 @@ class oauth2api(object):
 
         headers = util._generate_request_headers(credential)
         body = util._generate_oauth_request_body(credential, code)
-        print(f'Making request to: {env_type.api_endpoint}')
-        print(f'with body: {json.dumps(body, indent=2)}')
-        print(f'with headers: {json.dumps(headers, indent=2)}')
         resp = requests.post(env_type.api_endpoint, data=body, headers=headers)
-        print(f'Got request response:', resp)
 
         content = json.loads(resp.content)
+        if resp.status_code != requests.codes.ok:
+            raise Exception(f'Failed to get token: {resp.status_code} {json.dumps(content, indent=2)}')
+
         token = oAuth_token()
 
         if resp.status_code == requests.codes.ok:

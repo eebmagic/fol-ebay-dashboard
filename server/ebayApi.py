@@ -12,6 +12,7 @@ import aiohttp
 creds = credentialutil()
 creds.load(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 ebayAPI = oauth2api()
+ENV = environment.PRODUCTION
 
 def generate_scopes():
     # load the scopes from the config file
@@ -27,15 +28,32 @@ def generate_scopes():
 def generate_login_url():
     scopes = generate_scopes()
 
-    loginURL = ebayAPI.generate_user_authorization_url(environment.PRODUCTION, scopes)
+    # Join scopes with URL-encoded space
+    joined_scopes = '%20'.join(scopes)
 
-    return loginURL
+    # Get credentials
+    credential = credentialutil.get_credentials(ENV)
+
+    # Build parameters manually to control encoding
+    params = {
+        'client_id': credential.client_id,
+        'response_type': 'code',
+        'redirect_uri': credential.ru_name,
+        'scope': joined_scopes
+    }
+
+    # Build URL manually
+    query = '&'.join(f'{k}={v}' for k, v in params.items())
+    url = f'{ENV.web_endpoint}?{query}'
+
+    return url
 
 
 ### Endpoint Interactions ###
 
 def get_orders(token, start_date=None, end_date=None):
     url = 'https://api.ebay.com/sell/fulfillment/v1/order'
+
     headers = {
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json'
@@ -93,7 +111,7 @@ async def get_item(token, item_id):
 ### Auth Tokens ###
 
 def get_token(code):
-    tokenResponse = ebayAPI.exchange_code_for_access_token(environment.PRODUCTION, code)
+    tokenResponse = ebayAPI.exchange_code_for_access_token(ENV, code)
 
     return tokenResponse
 
@@ -101,6 +119,6 @@ def get_token(code):
 def refresh_token(refresh_token):
     scopes = generate_scopes()
 
-    refreshedToken = ebayAPI.get_access_token(environment.PRODUCTION, refresh_token=refresh_token, scopes=scopes)
+    refreshedToken = ebayAPI.get_access_token(ENV, refresh_token=refresh_token, scopes=scopes)
 
     return refreshedToken.to_json()
