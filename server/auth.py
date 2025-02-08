@@ -17,6 +17,8 @@ def load_session_store():
             except json.JSONDecodeError:
                 sessions = {}
     else:
+        with open(SESSIONS_FILE, 'w') as f:
+            json.dump({}, f)
         sessions = {}
 
     return sessions

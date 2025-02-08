@@ -35,6 +35,10 @@ async def check_cache(order_id):
                 with open(_cache_file, 'r') as f:
                     content = json.load(f)
                     _cache = content
+            else:
+                with open(_cache_file, 'w') as f:
+                    json.dump({}, f)
+                return {}
         except Exception as e:
             print(f"Error loading cache: {e}")
             return None
