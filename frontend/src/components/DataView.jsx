@@ -64,6 +64,8 @@ function DataView({ orders, toast }) {
         <div className="realOrders">
           <DataTable 
             value={orders}
+            sortField="Date Sold"
+            sortOrder={1}
             selectionMode='checkbox'
             selection={selectedOrders}
             onSelectionChange={(e) => setSelectedOrders(e.value)}

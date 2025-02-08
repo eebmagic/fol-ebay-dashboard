@@ -26,6 +26,11 @@ export const buildClipobard = (orders, columns) => {
   console.log('columns', columns);
 
   try {
+    orders.sort((a, b) => {
+      const dateA = new Date(a['Date Sold']);
+      const dateB = new Date(b['Date Sold']);
+      return dateA - dateB;
+    });
     const mapReuslt = orders.map(order => {
         return handleRow(order, columns);
     });
@@ -34,7 +39,6 @@ export const buildClipobard = (orders, columns) => {
 
     const joinedRows = mapReuslt.join('\n');
     console.log('joinedRows', joinedRows);
-    // const text = 'Hello, this is a test string';
     navigator.clipboard.writeText(joinedRows);
     return true;
   } catch (error) {
