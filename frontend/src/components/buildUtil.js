@@ -45,14 +45,15 @@ export const buildClipobard = (orders, columns) => {
 
 
 export const DEFAULT_COLUMNS = [
-  SPACER,
-  SPACER,
   'Title',
   'Image',
   'Date Listed',
   'Date Sold',
   'Total Days Listed',
   'Accepted Price',
+  SPACER,
+  SPACER,
+  SPACER,
   'Total Sold Price',
   'Tax',
   'Fees',
