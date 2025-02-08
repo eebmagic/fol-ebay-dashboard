@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {}, isDev ? false }:
 
 let
   pythonPackages = ps: with ps; [
@@ -12,6 +12,13 @@ let
   ];
 
   python = pkgs.python3.withPackages pythonPackages;
+
+  lib = pkgs.lib;
+  envVars = if isDev then {
+    REACT_APP_API_URL = "http://127.0.0.1:3000/api";
+  } else {
+    REACT_APP_API_URL = "https://fol.ebolton.site/api";
+  };
 
 in pkgs.mkShell {
   buildInputs = with pkgs; [
@@ -39,6 +46,10 @@ in pkgs.mkShell {
     # Set up Node.js environment variables
     export NODE_OPTIONS=--openssl-legacy-provider
     
+    # Set React API URL based on environment
+    ${lib.concatMapStringsSep "\n" (name: "export ${name}=${envVars.${name}}") (lib.attrNames envVars)}
+    echo "Using REACT_APP_API_URL: $REACT_APP_API_URL"
+
     # Install frontend dependencies if node_modules doesn't exist
     if [ ! -d frontend/node_modules ]; then
       echo "Installing frontend dependencies..."
