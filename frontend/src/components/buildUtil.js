@@ -55,14 +55,11 @@ export const DEFAULT_COLUMNS = [
   'Date Sold',
   'Total Days Listed',
   'Accepted Price',
-  SPACER,
-  SPACER,
-  SPACER,
   'Total Sold Price',
   'Tax',
   'Fees',
   'Shipping (Paid)',
   'Shipping Cost',
   'Shipping Difference',
-  'Total Income'
+  'Total Income',
 ];
